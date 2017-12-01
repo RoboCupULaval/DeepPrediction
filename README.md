@@ -11,4 +11,4 @@ Pour utiliser cet utilitaire :
 - Aller dans ssl-logtools/build/src/examples dans un terminal
 - Exécuter la commande "make examplereader"
 - L'exécutable se trouve dans ssl-logtools/build/bin/examplereader
-- L'appel à l'utilitaire se fait comme ceci : "examplereader <log file>"
+- L'appel à l'utilitaire se fait comme ceci : "examplereader [log file]"
