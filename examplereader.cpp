@@ -46,9 +46,11 @@ int main(int argc, char *argv[])
     }
 
     const char *filename = argv[1];
+    std::string outputFilename(filename);
+    outputFilename.append(".json");
 
     std::ifstream in(filename, std::ios_base::in | std::ios_base::binary);
-    std::ofstream output("output.json", std::ios::out | std::ios::trunc);
+    std::ofstream output(outputFilename.c_str(), std::ios::out | std::ios::trunc);
 
     if (!in.is_open())
     {
@@ -99,55 +101,60 @@ int main(int argc, char *argv[])
 
                     if (firstTime)
                     {
-                        output << "{" << std::endl
-                               << "\"packets\": [" << std::endl;
+                        output << "{[";
                         firstTime = false;
                     }
                     else
                     {
-                        output << "," << std::endl;
+                        output << ",";
                     }
 
-                    output << "{" << std::endl
-                           << "\"timestamp\": " << dataHeader.timestamp << "," << std::endl
-                           << "\"message_type\": " << dataHeader.messageType << std::endl
-                           << "\"message_size\": " << dataHeader.messageSize << std::endl;
-
-                    if (dataHeader.messageType == MESSAGE_SSL_VISION_2010)
+                    if (dataHeader.messageType != 4)
                     {
-                        SSL_WrapperPacket packet;
-                        if (packet.ParseFromArray(data, dataHeader.messageSize))
-                        {
-                            visionPackets++;
+                        output << "{"
+                               << "\"timestamp\": " << dataHeader.timestamp << ","
+                               << "\"message_type\": " << dataHeader.messageType << ","
+                               << "\"message_size\": " << dataHeader.messageSize;
 
-                            output << "\"message\": " << getJson(packet);
 
-                        }
-                        else
+
+                        if (dataHeader.messageType == MESSAGE_SSL_VISION_2010)
                         {
-                            std::cerr << "Error parsing vision packet!" << std::endl;
+                            SSL_WrapperPacket packet;
+                            if (packet.ParseFromArray(data, dataHeader.messageSize))
+                            {
+                                visionPackets++;
+
+                                output << ",\"message\": " << getJson(packet);
+
+                            }
+                            else
+                            {
+                                std::cerr << "Error parsing vision packet!" << std::endl;
+                            }
                         }
+                        else if (dataHeader.messageType == MESSAGE_SSL_REFBOX_2013)
+                        {
+                            SSL_Referee packet;
+                            if (packet.ParseFromArray(data, dataHeader.messageSize))
+                            {
+                                refereePackets++;
+
+                                output << ",\"message\": " << getJson(packet);
+
+                            }
+                            else
+                            {
+                                std::cerr << "Error parsing vision packet!" << std::endl;
+                            }
+                        }
+                        output << "}";
                     }
-                    else if (dataHeader.messageType == MESSAGE_SSL_REFBOX_2013)
-                    {
-                        SSL_Referee packet;
-                        if (packet.ParseFromArray(data, dataHeader.messageSize))
-                        {
-                            refereePackets++;
 
-                            output << "\"message\": " << getJson(packet);
-
-                        }
-                        else
-                        {
-                            std::cerr << "Error parsing vision packet!" << std::endl;
-                        }
-                    }
-                    output << "}";
                     delete data;
                 }
             }
-            output << "]}" << std::endl;
+            output << "]}";
         }
     }
     else
@@ -162,7 +169,7 @@ std::string getJson(const google::protobuf::Message &packet)
 {
     std::string json_string;
     google::protobuf::util::JsonPrintOptions options;
-    options.add_whitespace = true;
+    options.add_whitespace = false;
     options.always_print_primitive_fields = true;
     options.preserve_proto_field_names = true;
     MessageToJsonString(packet, &json_string, options);
