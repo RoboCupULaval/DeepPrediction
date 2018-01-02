@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
     {
         std::cout << "No input file name specified!" << std::endl;
         std::cout << "Please run \"examplereader <log file>\"." << std::endl;
-
         return -1;
     }
 
@@ -94,29 +93,25 @@ int main(int argc, char *argv[])
 
                 if (dataHeader.messageSize > 0)
                 {
-
                     char* data = new char[dataHeader.messageSize];
-
                     in.read(data, dataHeader.messageSize);
-
-                    if (firstTime)
-                    {
-                        output << "{[";
-                        firstTime = false;
-                    }
-                    else
-                    {
-                        output << ",";
-                    }
 
                     if (dataHeader.messageType != 4)
                     {
+                        if (firstTime)
+                        {
+                            output << "{\"packets\": [";
+                            firstTime = false;
+                        }
+                        else
+                        {
+                            output << ",";
+                        }
+
                         output << "{"
                                << "\"timestamp\": " << dataHeader.timestamp << ","
                                << "\"message_type\": " << dataHeader.messageType << ","
                                << "\"message_size\": " << dataHeader.messageSize;
-
-
 
                         if (dataHeader.messageType == MESSAGE_SSL_VISION_2010)
                         {
@@ -124,9 +119,7 @@ int main(int argc, char *argv[])
                             if (packet.ParseFromArray(data, dataHeader.messageSize))
                             {
                                 visionPackets++;
-
                                 output << ",\"message\": " << getJson(packet);
-
                             }
                             else
                             {
@@ -139,9 +132,7 @@ int main(int argc, char *argv[])
                             if (packet.ParseFromArray(data, dataHeader.messageSize))
                             {
                                 refereePackets++;
-
                                 output << ",\"message\": " << getJson(packet);
-
                             }
                             else
                             {
