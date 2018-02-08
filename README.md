@@ -1,4 +1,4 @@
-# GameLogsToJson
+# DeepPrediction
 Convert protobuf binary files to a convenient JSON format
 
 Pour utiliser cet utilitaire :
