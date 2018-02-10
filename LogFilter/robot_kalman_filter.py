@@ -61,8 +61,8 @@ class RobotFilter(KalmanFilter):
 
         self._update(error, t_capture)
 
-    def predict(self, input_command=None):
-        self._predict(input_command)
+    def predict(self, t_capture):
+        self._predict(t_capture)
         self.x[4] = self.wrap_to_pi(self.x[4])
 
     @staticmethod

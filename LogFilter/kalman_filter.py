@@ -1,6 +1,5 @@
 from abc import abstractmethod
 import numpy as np
-from time import time
 
 MAX_DT = 1
 
@@ -11,7 +10,7 @@ class KalmanFilter:
 
         self.is_active = False
         self.last_update_time = 0
-        self.last_predict_time = time()
+        self.last_predict_time = 0
         self.dt = 0
 
         self.state_number = int(np.size(self.transition_model(), 0))
@@ -61,15 +60,12 @@ class KalmanFilter:
         # Update the states covariance matrix
         self.P = self.P - gain @ self.observation_model() @ self.P
 
-    def _predict(self, input_command):
-        self.dt = time() - self.last_predict_time
-        self.last_predict_time = time()
+    def _predict(self, t_capture):
+        self.dt = t_capture - self.last_predict_time
+        self.last_predict_time = t_capture
 
-        # Predict the next state from states vector and input commands
-        if np.all(input_command):
-            self.x = self.transition_model() @ self.x + self.control_input_model() @ input_command
-        else:
-            self.x = self.transition_model() @ self.x
+        # Predict the next state from states vector
+        self.x = self.transition_model() @ self.x
 
         # Update the state covariance matrix from the transition model
         self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q
@@ -78,8 +74,8 @@ class KalmanFilter:
         error = observation - self.observation_model() @ self.x
         self._update(error, t_capture)
 
-    def predict(self, input_command=None):
-        self._predict(input_command)
+    def predict(self, t_capture):
+        self._predict(t_capture)
 
     def reset(self):
         self.is_active = False

@@ -25,9 +25,9 @@ class MultiBallService(list):
         if self.filter_ball_observation(obs) or not self[0].is_active:
             self[0].update(obs, self._current_timestamp)
 
-    def predict(self) -> None:
+    def predict(self, t_capture) -> None:
         for ball in self:
-            ball.predict()
+            ball.predict(t_capture)
 
     def remove_undetected(self) -> None:
         undetected_balls = [ball for ball in self

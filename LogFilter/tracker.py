@@ -1,4 +1,5 @@
 from typing import Dict, List
+from itertools import chain
 
 import numpy as np
 
@@ -20,9 +21,9 @@ class Tracker:
 
         self._current_timestamp = None
 
-    def update(self, detection_frame) -> Dict:
+    def update(self, detection_frame, t_capture) -> Dict:
 
-        self._current_timestamp = detection_frame['t_capture']
+        self._current_timestamp = t_capture
         self._update(detection_frame)
         self.remove_undetected()
 
@@ -42,26 +43,12 @@ class Tracker:
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._balls.update(obs, self._current_timestamp)
 
-    def predict(self, robot_packet):
+    def predict(self, t_capture):
 
-        input_commands = [None for _ in range(12)]
-        for packet in robot_packet:
-            input_commands[packet.robot_id] = packet.command
+        for robot in chain(self._blue_team, self._yellow_team):
+            robot.predict(t_capture)
 
-        if self.team_color == 'yellow':
-            for robot, input_cmd in zip(self._yellow_team, input_commands):
-                input_cmd = [input_cmd[state] for state in ['x', 'y', 'orientation']] if input_cmd else None
-                robot.predict(np.array(input_cmd))
-            for robot in self._blue_team:
-                robot.predict()
-        else:
-            for robot in self._yellow_team:
-                robot.predict()
-            for robot, input_cmd in zip(self._blue_team, input_commands):
-                input_cmd = [input_cmd[state] for state in ['x', 'y', 'orientation']] if input_cmd else None
-                robot.predict(np.array(input_cmd))
-
-        self._balls.predict()
+        self._balls.predict(t_capture)
 
     def remove_undetected(self):
         active_robots = iter(robot for robot in self._yellow_team + self._blue_team if robot.is_active)

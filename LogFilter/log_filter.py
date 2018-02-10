@@ -29,15 +29,19 @@ class LogFilter:
 
         for n, packet in enumerate(self.data_json):
 
-            message = packet['message']
-
             # Detection packet
-            if 'detection' in message.keys():
+            if packet['message_type'] == 2 and 'detection' in packet['message'].keys():
+
+                detection_frame = packet['message']['detection']
+
+                # Update timestamp
+                t_capture = detection_frame['t_capture']
+                self.timestamp = t_capture
 
                 # Update the current state
-                detection_frame = packet['message']['detection']
-                self.current_state = self.tracker.update(detection_frame)
-                self.timestamp = self.current_state['timestamp']  # Update timestamp
+                self.tracker.update(detection_frame, t_capture)
+                self.tracker.predict(t_capture)
+                self.current_state = self.tracker.track_frame
 
                 # Create a new row
                 csv_row = list()
@@ -51,14 +55,14 @@ class LogFilter:
                 self.csv_content.append(csv_row)
 
             # Referee packet
-            elif all(key in message.keys() for key in ('command', 'stage')):
+            elif packet['message_type'] == 3:
 
                 # Update the current stage and the current command
-                self.current_command = message['command']
-                self.current_stage = message['stage']
+                self.current_command = packet['message']['command']
+                self.current_stage = packet['message']['stage']
 
             # Print the number of packets filtered
-            if (n + 1) % 10000 == 0:
+            if (n + 1) % 1000 == 0:
                 print("{} / {} packets processed".format(n + 1, self.nb_packets))
 
         return self.csv_content
@@ -73,8 +77,8 @@ class LogFilter:
     def _append_ball(self, csv_row):
         """Append ball information"""
 
-        ball = self.current_state['balls'][0]
-        if ball:
+        if self.current_state['balls'] and self.current_state['balls'][0]:
+            ball = self.current_state['balls'][0]
             csv_row += [ball['pose']['x'],
                         ball['pose']['y'],
                         ball['velocity']['x'],
