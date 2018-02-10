@@ -1,6 +1,6 @@
 # DeepPrediction
 
-- ## GameLogsToJson
+## GameLogsToJson
 Convert protobuf binary files to a convenient JSON format
 
 Pour utiliser cet utilitaire :
@@ -16,7 +16,7 @@ Pour utiliser cet utilitaire :
 - L'appel à l'utilitaire se fait comme ceci : "examplereader [log file]"
 
 
-- ## LogFilter
+## LogFilter
 Apply a Kalman filter on game logs in JSON format and output a CSV file
 
 Pour utiliser cet utilitaire :
