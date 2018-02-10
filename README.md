@@ -1,4 +1,6 @@
 # DeepPrediction
+
+## GameLogsToJson
 Convert protobuf binary files to a convenient JSON format
 
 Pour utiliser cet utilitaire :
@@ -12,3 +14,12 @@ Pour utiliser cet utilitaire :
 - Exécuter la commande "make examplereader"
 - L'exécutable se trouve dans ssl-logtools/build/bin/examplereader
 - L'appel à l'utilitaire se fait comme ceci : "examplereader [log file]"
+
+
+## LogFilter
+Apply a Kalman filter on game logs in JSON format and output a CSV file
+
+Pour utiliser cet utilitaire :
+
+- Simplement lancer main.py [log_file.json]
+- Un fichier [log_file.json.csv] sera créé dans le dossier du fichier source
