@@ -1,4 +1,5 @@
 # DeepPrediction
+Tools for converting Robocup SSL game logs to a more usable format for machine learning
 
 ## GameLogsToJson
 Convert protobuf binary files to a convenient JSON format
@@ -17,7 +18,7 @@ Pour utiliser cet utilitaire :
 
 
 ## LogFilter
-Apply a Kalman filter on game logs in JSON format and output a CSV file
+Apply a Kalman filter to game logs in JSON format and output a CSV file
 
 Pour utiliser cet utilitaire :
 
